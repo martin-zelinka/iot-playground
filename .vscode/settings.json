@@ -1,0 +1,15 @@
+{
+    //"python.languageServer": "None",
+    "python.defaultInterpreterPath": ".venv/bin/python",
+    "search.exclude": { //hide files for search
+        ".venv/*": true,
+        ".pytest_cache/*": true
+    },
+    // "files.watcherExclude": {
+    //     "**/.venv/**": true,
+    //     "**/.pytest_cache/**": true
+    // },
+    "files.exclude": { //hide files for explorer and intellisense
+        ".pytest_cache": true
+    }
+}
