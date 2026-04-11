@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
-    "mqtt_storage",
+    "devices",
 ]
 
 MIDDLEWARE = [
@@ -87,6 +87,17 @@ DATABASES = {
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
         "HOST": os.getenv("POSTGRES_HOST"),
         "PORT": os.getenv("POSTGRES_PORT"),
+    }
+}
+
+# MongoDB connection settings
+MONGODB_DATABASES = {
+    "default": {
+        "NAME": os.getenv("MONGODB_DB", "mqtt_playground"),
+        "HOST": os.getenv("MONGODB_HOST", "localhost"),
+        "PORT": int(os.getenv("MONGODB_PORT", 27017)),
+        "USER": os.getenv("MONGODB_USER", ""),
+        "PASSWORD": os.getenv("MONGODB_PASSWORD", ""),
     }
 }
 

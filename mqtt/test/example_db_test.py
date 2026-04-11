@@ -33,7 +33,7 @@ def publisher_example(city):
 
     # Publish weather data for particular city
     print(f"\n🌍 Publishing weather data for {city}...")
-    for _ in range(10):
+    for _ in range(5):
         try:
             publisher.publish_sensor_data(city)
         except Exception as e:

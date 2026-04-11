@@ -181,6 +181,7 @@ dependencies = [
     { name = "django-extension" },
     { name = "paho-mqtt" },
     { name = "psycopg" },
+    { name = "pymongo" },
     { name = "python-dotenv" },
     { name = "requests" },
 ]
@@ -196,6 +197,7 @@ requires-dist = [
     { name = "django-extension", specifier = ">=0.1.0" },
     { name = "paho-mqtt", specifier = ">=2.0.0" },
     { name = "psycopg", specifier = ">=3.0.0" },
+    { name = "pymongo", specifier = ">=4.16.0" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "requests", specifier = ">=2.33.1" },
 ]

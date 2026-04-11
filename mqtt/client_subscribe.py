@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""MQTT to Database Bridge - Subscribes to topics and stores messages in PostgreSQL."""
+"""MQTT to Database Bridge - Subscribes to topics and stores messages in PostgreSQL and MongoDB."""
 
 import json
 import logging
@@ -25,19 +25,21 @@ django.setup()
 
 from django.db import transaction
 from mqtt.client import MQTTClient
-from mqtt_storage.models import MQTTPacket, MQTTClientStatus
+from devices.models import MQTTPacket, MQTTClientStatus
+from db_clients.mongo_client import MongoDBClient
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
 class MQTTDatabaseBridge:
-    """Bridge between MQTT broker and PostgreSQL database."""
+    """Bridge between MQTT broker and PostgreSQL/MongoDB databases."""
 
     def __init__(self, broker_host: str = "localhost", broker_port: int = 1883):
         self.broker_host = broker_host
         self.broker_port = broker_port
         self.subscriber = None
+        self.mongo_client = None
         self.running = False
         self.stats = {'messages_received': 0, 'messages_processed': 0, 'errors': 0, 'start_time': None}
 
@@ -86,12 +88,26 @@ class MQTTDatabaseBridge:
 
             logger.info(f"📩 {topic}: {str(payload_json)[:100]}...")
 
-            # Save all received messages
+            # Save to PostgreSQL with transaction
             with transaction.atomic():
                 packet = MQTTPacket.objects.create(topic=topic, payload=payload_json, qos=0, retain=False)
                 self.update_device_status(topic, packet)
-                self.stats['messages_processed'] += 1
-                logger.info(f"✓ Saved to database (ID: {packet.id})")
+
+            # Save to MongoDB asynchronously (non-blocking)
+            if self.mongo_client:
+                try:
+                    mongo_id = self.mongo_client.store_mqtt_packet(
+                        topic=topic,
+                        payload=payload_json,
+                    )
+                    if mongo_id:
+                        logger.debug(f"✓ Also stored in MongoDB (ID: {mongo_id})")
+
+                except Exception as mongo_error:
+                    logger.warning(f"⚠ MongoDB storage failed: {mongo_error}")
+
+            self.stats['messages_processed'] += 1
+            logger.info(f"✓ Saved to PostgreSQL (ID: {packet.id})")
 
         except Exception as e:
             self.stats['errors'] += 1
@@ -100,6 +116,18 @@ class MQTTDatabaseBridge:
     def start(self):
         """Start the MQTT to database bridge."""
         logger.info("Starting MQTT to Database Bridge...")
+
+        # Initialize MongoDB connection
+        try:
+            self.mongo_client = MongoDBClient()
+            if not self.mongo_client.connect():
+                logger.warning("⚠ Failed to connect to MongoDB - continuing with PostgreSQL only")
+                self.mongo_client = None
+            else:
+                logger.info("✓ Connected to MongoDB")
+        except Exception as e:
+            logger.warning(f"⚠ MongoDB connection failed: {e} - continuing with PostgreSQL only")
+            self.mongo_client = None
 
         # Create and connect subscriber
         self.subscriber = MQTTClient(client_id="mqtt_db_bridge", host=self.broker_host, port=self.broker_port)
@@ -115,7 +143,14 @@ class MQTTDatabaseBridge:
 
         self.running = True
         self.stats['start_time'] = datetime.now()
+
+        db_info = []
+        db_info.append("PostgreSQL")
+        if self.mongo_client:
+            db_info.append("MongoDB")
+
         logger.info(f"✓ Bridge running on {self.broker_host}:{self.broker_port}, monitoring `sensors/#` topics")
+        logger.info(f"✓ Storing data in: {', '.join(db_info)}")
         return True
 
     def stop(self):
@@ -125,6 +160,10 @@ class MQTTDatabaseBridge:
 
         if self.subscriber:
             self.subscriber.disconnect()
+
+        # Close MongoDB connection
+        if self.mongo_client:
+            self.mongo_client.disconnect()
 
         # Print statistics
         if self.stats['start_time']:
