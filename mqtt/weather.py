@@ -25,7 +25,6 @@ def get_weather(city: City) -> float | None:
         data = response.json()
 
         temp = data["current_weather"]["temperature"]
-        print(f"{city}: {temp} °C")
 
         return float(temp)
     except Timeout:

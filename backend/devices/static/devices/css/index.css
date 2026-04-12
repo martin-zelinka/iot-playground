@@ -1,0 +1,154 @@
+/* MQTT Client Devices Index Page Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+h1 {
+    background: #2c3e50;
+    color: white;
+    padding: 20px;
+    margin: 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #34495e;
+    color: white;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status.online {
+    background-color: #27ae60;
+    color: white;
+}
+
+.status.offline {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.status.unknown {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.status.error {
+    background-color: #c0392b;
+    color: white;
+}
+
+.empty-state {
+    padding: 40px;
+    text-align: center;
+    color: #7f8c8d;
+}
+
+.stats {
+    padding: 15px 20px;
+    background: #ecf0f1;
+    display: flex;
+    gap: 20px;
+}
+
+.stat-item {
+    font-size: 14px;
+    color: #2c3e50;
+}
+
+.stat-item strong {
+    font-weight: 600;
+}
+
+a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.shutdown-btn {
+    background-color: #e74c3c;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.shutdown-btn:hover {
+    background-color: #c0392b;
+}
+
+.messages {
+    padding: 15px 20px;
+    margin: 0;
+}
+
+.messages .success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.messages .error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}

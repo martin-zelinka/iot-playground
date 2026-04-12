@@ -6,7 +6,6 @@ Listens on device/control/{CLIENT_ID} for shutdown commands.
 
 import json
 import logging
-import sys
 import time
 from typing import Any, Callable
 import paho.mqtt.client as mqtt
@@ -159,7 +158,6 @@ class MQTTClient:
                 logger.info("🛑 Shutdown command received, stopping client...")
                 self.running = False
                 self.disconnect()
-                sys.exit(0)
 
             elif command == 'restart':
                 logger.info("🔄 Restart command received...")

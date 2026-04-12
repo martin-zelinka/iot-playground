@@ -3,7 +3,8 @@ Views for devices app.
 Provides web pages for viewing MQTT client devices and their data.
 """
 from django.views.decorators.http import require_http_methods
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
 from bson import json_util
 import json
 import logging
@@ -61,3 +62,44 @@ def device_detail_page(request, client_id):
             'client_id': client_id,
             'device_data': []
         })
+
+
+@require_http_methods(["POST"])
+def device_shutdown(request, client_id):
+    """
+    Send shutdown command to a specific MQTT client device.
+    """
+    try:
+        from mqtt.client import MQTTClient
+
+        # Create a temporary client for sending the shutdown command
+        shutdown_client = MQTTClient(
+            client_id=f"django_controller_{client_id}",
+            host="localhost",
+            port=1883,
+            listen_for_control=False  # Don't need to listen for control messages
+        )
+
+        if shutdown_client.connect():
+            # Publish shutdown command to the device's control topic
+            control_topic = f"device/control/{client_id}"
+            shutdown_client.publish(control_topic, "shutdown")
+
+            logger.info(f"Sent shutdown command to device: {client_id}")
+            messages.success(request, f"Shutdown command sent to {client_id}")
+
+            # Give the message time to be sent
+            import time
+            time.sleep(0.5)
+
+            shutdown_client.disconnect()
+        else:
+            logger.error(f"Failed to connect to MQTT broker for shutdown: {client_id}")
+            messages.error(request, f"Failed to send shutdown command to {client_id}")
+
+    except Exception as e:
+        logger.error(f"Error sending shutdown command to {client_id}: {e}")
+        messages.error(request, f"Error: {str(e)}")
+
+    # Redirect back to devices list
+    return redirect('devices:devices_list')

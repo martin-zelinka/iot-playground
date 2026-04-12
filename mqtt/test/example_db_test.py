@@ -4,14 +4,11 @@ Complete Example: MQTT Broker + Database Service + Weather Publisher
 Demonstrates the full data flow from publisher to database storage.
 """
 
-import os
 import random
-import sys
 import time
 import threading
 from mqtt.broker import MQTTBroker
 from mqtt.client import MQTTClient
-from mqtt.weather import City
 from mqtt.client_subscribe import MQTTDatabaseBridge
 
 
@@ -33,9 +30,14 @@ def publisher_example(city):
 
     # Publish weather data for particular city
     print(f"\n🌍 Publishing weather data for {city}...")
-    for _ in range(5):
+    for _ in range(15):
         try:
             publisher.publish_sensor_data(city)
+
+            # check if device was not shutdown
+            if not publisher.running:
+                return
+
         except Exception as e:
             print(f"❌ Error getting weather for {city}: {e}")
 

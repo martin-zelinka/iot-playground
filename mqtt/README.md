@@ -40,7 +40,7 @@ uv run mqtt/broker.py --config /path/to/custom.conf
 
 ## Topics
 
-- `device/sensors/{CLIENT_ID}/{location}/temperature` - Temperature/weather readings
+- `device/sensors/{CLIENT_ID}/{location}/temperature` - Temperature sensor data readings from particular client
 - `device/sensors/#` - All sensor data
 - `device/control/{CLIENT_ID}` - Device control commands
 - `device/status/{CLIENT_ID}` - Device status information
@@ -49,22 +49,22 @@ uv run mqtt/broker.py --config /path/to/custom.conf
 
 ```bash
 # Subscribe to device topics (listens for control commands and sensor data)
-uv run mqtt/client_cli.py
+uv run -m mqtt.client_cli
 
 # Subscribe to specific topic
-uv run mqtt/client_cli.py --topic "device/sensors/#"
+uv run -m mqtt.client_cli --topic "device/sensors/#"
 
 # Publish a message
-uv run mqtt/client_cli.py --publish "test/topic" --message "Hello World"
-uv run mqtt/client_cli.py --publish "device/control/{CLIENT_ID}" --message "shutdown"
+uv run -m mqtt.client_cli --publish "test/topic" --message "Hello World"
+uv run -m mqtt.client_cli --publish "device/control/{CLIENT_ID}" --message "shutdown"
 
 # Publish weather data for cities (LON, PRG, BRN)
-uv run mqtt/client_cli.py --city LON
-uv run mqtt/client_cli.py --city PRG
-uv run mqtt/client_cli.py --city BRN
+uv run -m mqtt.client_cli --city LON
+uv run -m mqtt.client_cli --city PRG
+uv run -m mqtt.client_cli --city BRN
 
 # Custom client ID with subscription
-uv run mqtt/client_cli.py --client-id "my_device" --topic "device/sensors/#"
+uv run -m mqtt.client_cli --client-id "my_device" --topic "device/sensors/#"
 ```
 
 ### 4. Run Complete Example
@@ -143,7 +143,7 @@ uv run mqtt/broker.py
 uv run mqtt/client_subscribe.py
 
 # 4. Publish data (automatically stored in database)
-uv run mqtt/client_cli.py --city LON
+uv run -m mqtt.client_cli --city LON
 ```
 
 ### Test Complete Example

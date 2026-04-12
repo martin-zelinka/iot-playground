@@ -12,4 +12,7 @@ urlpatterns = [
 
     # Device detail page
     path('<str:client_id>/', views.device_detail_page, name='device_detail_page'),
+
+    # Device shutdown action
+    path('<str:client_id>/shutdown/', views.device_shutdown, name='device_shutdown'),
 ]
