@@ -25,7 +25,7 @@ def database_service_example():
 def publisher_example(city):
     """Publish weather data that will be stored in the database."""
     print("📡 Starting Weather Publisher...")
-    publisher = MQTTClient(client_id=f"weather_publisher_{random.randint(1000, 9999)}")
+    publisher = MQTTClient(client_id=f"weather_publisher_{random.randint(1000, 9999)}", enable_lwt=True)
 
     if not publisher.connect():
         print("❌ Failed to connect to MQTT broker")

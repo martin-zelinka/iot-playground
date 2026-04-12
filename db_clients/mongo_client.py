@@ -98,7 +98,7 @@ class MongoDBClient:
 
         try:
             document = {
-                "source": topic.split('/')[1],
+                "source": topic.split('/')[2],
                 "protocol": "mqtt",
                 "payload":
                     {

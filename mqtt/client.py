@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Simplified MQTT Client with control topic support.
-Listens on device/{CLIENT_ID}/control for shutdown commands.
+Listens on device/control/{CLIENT_ID} for shutdown commands.
 """
 
 import json
@@ -27,13 +27,15 @@ class MQTTClient:
         host: str = "localhost",
         port: int = 1883,
         keepalive: int = 60,
-        listen_for_control: bool = True
+        listen_for_control: bool = True,
+        enable_lwt: bool = False
     ):
         self.client_id = client_id
         self.host = host
         self.port = port
         self.keepalive = keepalive
         self.listen_for_control = listen_for_control
+        self.enable_lwt = enable_lwt # client automatically publish msg when they disconnect unexpectedly
         self.running = True
         self.message_callback = None
 
@@ -47,8 +49,20 @@ class MQTTClient:
     def connect(self) -> bool:
         """Connect to the MQTT broker."""
         try:
+            # Set Last Will and Testament if enabled
+            if self.enable_lwt:
+                will_topic = f"device/status/{self.client_id}"
+                will_payload = json.dumps({"status": "offline", "client_id": self.client_id})
+                self.client.will_set(will_topic, will_payload, qos=1, retain=True)
+                logger.info(f"✓ LWT configured: {will_topic}")
+
             self.client.connect(self.host, self.port, self.keepalive)
             self.client.loop_start()
+
+            # Publish online status after connecting
+            if self.enable_lwt:
+                self._publish_status("online")
+
             return True
         except Exception as e:
             logger.error(f"Failed to connect: {e}")
@@ -56,9 +70,23 @@ class MQTTClient:
 
     def disconnect(self):
         """Disconnect from the MQTT broker."""
+        # Publish offline status gracefully before disconnecting
+        if self.enable_lwt:
+            self._publish_status("offline")
+
         self.running = False
         self.client.loop_stop()
         self.client.disconnect()
+
+    def _publish_status(self, status: str):
+        """Publish client status to status topic."""
+        try:
+            status_topic = f"device/status/{self.client_id}"
+            status_payload = {"status": status, "client_id": self.client_id}
+            self.publish(status_topic, status_payload, qos=1, retain=True)
+            logger.info(f"✓ Published status: {status}")
+        except Exception as e:
+            logger.warning(f"Failed to publish status: {e}")
 
     def _setup_callbacks(self):
         """Setup MQTT client callbacks."""
@@ -74,7 +102,7 @@ class MQTTClient:
 
             # Auto-subscribe to control topic
             if self.listen_for_control:
-                control_topic = f"device/{self.client_id}/control"
+                control_topic = f"device/control/{self.client_id}"
                 self.client.subscribe(control_topic)
                 logger.info(f"✓ Listening on control topic: {control_topic}")
         else:
@@ -105,7 +133,7 @@ class MQTTClient:
             logger.info(f"📩 {self.client_id} -> Received on '{msg.topic}': {payload}")
 
             # Handle control messages
-            if msg.topic == f"device/{self.client_id}/control":
+            if msg.topic == f"device/control/{self.client_id}":
                 self._handle_control_message(payload)
                 return
 
@@ -138,16 +166,6 @@ class MQTTClient:
                 self.disconnect()
                 time.sleep(2)
                 self.connect()
-
-            elif command == 'status':
-                status = {
-                    "client_id": self.client_id,
-                    "status": "running",
-                    "host": self.host,
-                    "port": self.port
-                }
-                self.publish(f"device/{self.client_id}/status", status)
-                logger.info(f"📊 Status: {status}")
 
             else:
                 logger.warning(f"❓ Unknown control command: {command}")
@@ -197,7 +215,7 @@ class MQTTClient:
             "unit": "°C",
             "timestamp": time.time()
         }
-        self.publish(f"sensors/{self.client_id}/{location}/temperature", payload)
+        self.publish(f"device/sensors/{self.client_id}/{location}/temperature", payload)
 
     def run_forever(self):
         """Keep the client running and listening for messages."""

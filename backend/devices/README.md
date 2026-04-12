@@ -11,7 +11,7 @@ The `device_data` collection stores documents like:
   "source": "weather_publisher_5096",
   "protocol": "mqtt",
   "payload": {
-    "topic": "sensors/weather_publisher_5096/PRG/temperature",
+    "topic": "device/sensors/weather_publisher_5096/PRG/temperature",
     "message": {
       "data": "{'client_id': 'weather_publisher_5096', 'location': 'PRG', 'temperature': 7.9, 'unit': '°C', 'timestamp': 1775940005.525998}"
     }
@@ -55,7 +55,7 @@ Content-Type: application/json
   "source": "weather_publisher_5096",
   "protocol": "mqtt",
   "payload": {
-    "topic": "sensors/weather_publisher_5096/PRG/temperature",
+    "topic": "device/sensors/weather_publisher_5096/PRG/temperature",
     "message": {
       "data": "{'temperature': 8.5}"
     }

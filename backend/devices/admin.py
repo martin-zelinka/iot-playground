@@ -1,21 +1,5 @@
 from django.contrib import admin
-from .models import MQTTPacket, MQTTClientStatus
-
-
-@admin.register(MQTTPacket)
-class MQTTPacketAdmin(admin.ModelAdmin):
-    """Admin interface for MQTT packets."""
-    list_display = ['topic', 'payload_preview', 'qos', 'retain', 'received_at']
-    list_filter = ['qos', 'retain', 'received_at']
-    search_fields = ['topic', 'payload']
-    readonly_fields = ['received_at']
-    date_hierarchy = 'received_at'
-    ordering = ['-received_at']
-
-    def payload_preview(self, obj):
-        """Show preview of JSON payload."""
-        return str(obj.payload)[:100]
-    payload_preview.short_description = 'Payload'
+from .models import MQTTClientStatus
 
 
 @admin.register(MQTTClientStatus)

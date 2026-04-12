@@ -7,12 +7,9 @@ from . import views
 app_name = 'devices'
 
 urlpatterns = [
-    # List all device data with optional filtering
-    path('devices/', views.device_data_list, name='device_data_list'),
+    # Devices list page (index)
+    path('', views.devices_list, name='devices_list'),
 
-    # Get latest data for a specific source
-    path('devices/<str:source>/latest/', views.device_data_detail, name='device_data_detail'),
-
-    # Create new device data
-    path('devices/create/', views.device_data_create, name='device_data_create'),
+    # Device detail page
+    path('<str:client_id>/', views.device_detail_page, name='device_detail_page'),
 ]

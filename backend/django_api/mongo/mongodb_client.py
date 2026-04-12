@@ -103,17 +103,3 @@ def get_latest_by_source(source):
     except PyMongoError as e:
         logger.error(f"Error getting latest data for source {source}: {e}")
         raise
-
-
-def insert_device_data(data):
-    """Insert a device data document."""
-    try:
-        client = MongoDBClient()
-        collection = client.get_collection()
-        result = collection.insert_one(data)
-        logger.info(f"Inserted device data with ID: {result.inserted_id}")
-        return result.inserted_id
-
-    except PyMongoError as e:
-        logger.error(f"Error inserting device data: {e}")
-        raise

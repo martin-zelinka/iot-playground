@@ -20,7 +20,7 @@ def subscriber_example():
     subscriber.set_message_callback(on_message)
 
     if subscriber.connect():
-        subscriber.subscribe("sensors/#")
+        subscriber.subscribe("device/#")
         subscriber.subscribe("test/#")
 
         # Keep subscriber running for 30 seconds

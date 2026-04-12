@@ -1,27 +1,6 @@
 from django.db import models
 
 
-class MQTTPacket(models.Model):
-    """Raw MQTT packet storage for all received messages."""
-    topic = models.CharField(max_length=512, db_index=True)
-    payload = models.JSONField(default=dict)
-    qos = models.IntegerField(default=0)
-    retain = models.BooleanField(default=False)
-    received_at = models.DateTimeField(auto_now_add=True, db_index=True)
-
-    class Meta:
-        ordering = ['-received_at']
-        verbose_name = "MQTT Packet"
-        verbose_name_plural = "MQTT Packets"
-        indexes = [
-            models.Index(fields=['topic', '-received_at']),
-            models.Index(fields=['received_at']),
-        ]
-
-    def __str__(self):
-        return f"{self.topic} @ {self.received_at}"
-
-
 class MQTTClientStatus(models.Model):
     """MQTT client status and connection tracking."""
     client_id = models.CharField(max_length=255, unique=True, db_index=True)

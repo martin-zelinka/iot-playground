@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""MQTT to Database Bridge - Subscribes to topics and stores messages in PostgreSQL and MongoDB."""
+"""MQTT to Database Bridge - Subscribes to device topics and stores messages in PostgreSQL and MongoDB."""
 
-import json
 import logging
 import signal
 import sys
@@ -25,7 +24,7 @@ django.setup()
 
 from django.db import transaction
 from mqtt.client import MQTTClient
-from devices.models import MQTTPacket, MQTTClientStatus
+from devices.models import MQTTClientStatus
 from db_clients.mongo_client import MongoDBClient
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -41,15 +40,14 @@ class MQTTDatabaseBridge:
         self.subscriber = None
         self.mongo_client = None
         self.running = False
-        self.stats = {'messages_received': 0, 'messages_processed': 0, 'errors': 0, 'start_time': None}
 
 
-
-    def update_device_status(self, topic: str, packet: MQTTPacket):
+    def update_device_status_table(self, topic: str):
         """Update device status based on received message."""
         try:
-            _, client_id, _, _ = topic.split('/')
-            client, created = MQTTClientStatus.objects.get_or_create(
+            # Extract client_id from topic: device/sensors/{client_id}/{location}/temperature
+            _, _, client_id, _, _ = topic.split('/')
+            client, new_row_created = MQTTClientStatus.objects.get_or_create(
                 client_id=client_id,
                 defaults={
                     'status': 'online',
@@ -58,7 +56,7 @@ class MQTTDatabaseBridge:
                 }
             )
 
-            if not created:
+            if not new_row_created:
                 client.status = 'online'
                 client.last_seen = datetime.now()
                 client.total_packets += 1
@@ -67,38 +65,29 @@ class MQTTDatabaseBridge:
         except Exception as e:
             logger.error(f"Error updating device status: {e}")
 
-    def handle_message(self, topic: str, payload):
-        """Main message handler - processes incoming MQTT messages."""
-        self.stats['messages_received'] += 1
-
+    def handle_message(self, topic: str, payload: dict):
+        """Main message handler - processes incoming MQTT messages.
+        """
         try:
-            # Convert payload to JSON if possible, otherwise store as string
-            if isinstance(payload, (bytes, bytearray)):
-                payload_str = payload.decode('utf-8')
-            elif not isinstance(payload, str):
-                payload_str = str(payload)
-            else:
-                payload_str = payload
+            # Handle status messages (LWT) `device/status/{CLIENT_ID}`
+            if topic.startswith('device/status/'):
+                self.handle_status_message(topic, payload)
+                return
 
-            # Try to parse as JSON
-            try:
-                payload_json = json.loads(payload_str)
-            except json.JSONDecodeError:
-                payload_json = {"data": payload_str}
+            # Handle sensor data message `device/sensors/{CLIENT_ID}/*`
 
-            logger.info(f"📩 {topic}: {str(payload_json)[:100]}...")
+            logger.info(f"📩 {topic}: {str(payload)[:100]}...")
 
             # Save to PostgreSQL with transaction
             with transaction.atomic():
-                packet = MQTTPacket.objects.create(topic=topic, payload=payload_json, qos=0, retain=False)
-                self.update_device_status(topic, packet)
+                self.update_device_status_table(topic)
 
             # Save to MongoDB asynchronously (non-blocking)
             if self.mongo_client:
                 try:
                     mongo_id = self.mongo_client.store_mqtt_packet(
                         topic=topic,
-                        payload=payload_json,
+                        payload=payload,
                     )
                     if mongo_id:
                         logger.debug(f"✓ Also stored in MongoDB (ID: {mongo_id})")
@@ -106,12 +95,37 @@ class MQTTDatabaseBridge:
                 except Exception as mongo_error:
                     logger.warning(f"⚠ MongoDB storage failed: {mongo_error}")
 
-            self.stats['messages_processed'] += 1
-            logger.info(f"✓ Saved to PostgreSQL (ID: {packet.id})")
+        except Exception as e:
+            logger.error(f"✗ Error processing message: {e}")
+
+    def handle_status_message(self, topic: str, payload: dict):
+        """Handle client status messages from LWT."""
+        try:
+            # Extract client_id from topic: device/status/{client_id}
+            _, _, client_id = topic.split('/')
+
+            status = payload.get('status', 'unknown')
+
+            # Update or create client status entry
+            client, created = MQTTClientStatus.objects.get_or_create(
+                client_id=client_id,
+                defaults={
+                    'status': status,
+                    'first_seen': datetime.now(),
+                    'total_packets': 0
+                }
+            )
+
+            if not created:
+                client.status = status
+                client.last_seen = datetime.now()
+                client.save(update_fields=['status', 'last_seen'])
+
+            status_icon = "🟢" if status == "online" else "🔴"
+            logger.info(f"{status_icon} Client '{client_id}' status: {status}")
 
         except Exception as e:
-            self.stats['errors'] += 1
-            logger.error(f"✗ Error processing message: {e}")
+            logger.error(f"✗ Error processing status message: {e}")
 
     def start(self):
         """Start the MQTT to database bridge."""
@@ -138,18 +152,19 @@ class MQTTDatabaseBridge:
             logger.error("Failed to connect to MQTT broker")
             return False
 
-        # Subscribe to sensor topics
-        self.subscriber.subscribe("sensors/#")
+        # Subscribe to sensor and status topics
+        self.subscriber.subscribe("device/sensors/#")
+        self.subscriber.subscribe("device/status/#")
+        logger.info("✓ Listening for device sensors and status topics")
 
         self.running = True
-        self.stats['start_time'] = datetime.now()
 
         db_info = []
         db_info.append("PostgreSQL")
         if self.mongo_client:
             db_info.append("MongoDB")
 
-        logger.info(f"✓ Bridge running on {self.broker_host}:{self.broker_port}, monitoring `sensors/#` topics")
+        logger.info(f"✓ Bridge running on {self.broker_host}:{self.broker_port}, monitoring `device/sensors/#` and `device/status/#`")
         logger.info(f"✓ Storing data in: {', '.join(db_info)}")
         return True
 
@@ -164,12 +179,6 @@ class MQTTDatabaseBridge:
         # Close MongoDB connection
         if self.mongo_client:
             self.mongo_client.disconnect()
-
-        # Print statistics
-        if self.stats['start_time']:
-            runtime = datetime.now() - self.stats['start_time']
-            logger.info(f"Stats: runtime={runtime}, received={self.stats['messages_received']}, "
-                       f"processed={self.stats['messages_processed']}, errors={self.stats['errors']}")
 
     def run(self):
         """Run the bridge until interrupted."""
