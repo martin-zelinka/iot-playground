@@ -1,11 +1,31 @@
-## MQTT + DJANGO project
+# IoT playground
 
+### MQTT Topics Architecture
 
+![MQTT Schema](mqtt_schema.png)
 
-**macOS:**
+### MQTT Clients:
+
+**Sensor** connect with LWT (Last Will and Testament) enabled
+- Automatically publish `online` status to `device/status/{CLIENT_ID}` on connect
+- Publish sensor data `device/sensors/{CLIENT_ID}/{location}/temperature`
+    - Temperature data from weather APIs (Open-Meteo)
+    - Locations: LON (London), PRG (Prague), BRN (Brno)
+- Subscribe to `device/control/{CLIENT_ID}` where we listen for shutdown event
+
+**Database Bridge** dumping data from sensors clients:
+- subscribe to `device/sensors/#` and stores data to **MongoDB** (iot_platform collection)
+- subscribe to `device/status/#` and stores data to **PostgreSQL** (MQTTClientStatus model)
+
+**Django mqtt client**:
+- publish data to `device/control/{CLIENT_ID}` with `shutdown` msg for client we want to kill
+
+---
+
+### Setup & Run
+
+**MacOS:**
 ```bash
-
-
 brew install mosquitto
 
 brew tap mongodb/brew
@@ -18,8 +38,7 @@ uv run backend/manage.py runserver
 uv run -m mqtt.test.example_db_test
 ```
 
-
-**Docker commands**
+**Docker:**
 ```bash
 docker-compose build --no-cache
 docker-compose up
