@@ -1,0 +1,30 @@
+FROM python:3.13-slim
+
+# Install mosquitto broker and clients
+RUN apt-get update -yqq && \
+    apt-get install -yqq curl && \
+    apt-get install -y mosquitto mosquitto-clients && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:0.9 /uv /bin/uv
+
+# Set working directory
+WORKDIR /app
+
+COPY pyproject.toml uv.lock /app/
+
+ENV UV_PROJECT_ENVIRONMENT=/usr/local
+RUN uv sync --frozen --no-dev
+
+# Copy data to /app
+COPY mqtt/ ./mqtt
+COPY db_clients/ ./db_clients
+
+#TODO remove and use own postgre db connector from db_clients
+COPY backend/ ./backend
+
+# Expose MQTT broker port
+EXPOSE 1883
+
+# Start mosquitto + your Python app
+CMD ["uv", "run", "-m", "mqtt.test.example_db_test"]

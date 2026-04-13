@@ -11,11 +11,15 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Add parent directory to Python path to import mqtt and db_clients modules
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -99,6 +103,12 @@ MONGODB_DATABASES = {
         "USER": os.getenv("MONGODB_USER", ""),
         "PASSWORD": os.getenv("MONGODB_PASSWORD", ""),
     }
+}
+
+# MQTT Broker settings
+MQTT_BROKER = {
+    "HOST": os.getenv("MQTT_BROKER_HOST", "localhost"),
+    "PORT": int(os.getenv("MQTT_BROKER_PORT", 1883)),
 }
 
 

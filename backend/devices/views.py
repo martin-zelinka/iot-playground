@@ -2,6 +2,7 @@
 Views for devices app.
 Provides web pages for viewing MQTT client devices and their data.
 """
+from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -75,8 +76,8 @@ def device_shutdown(request, client_id):
         # Create a temporary client for sending the shutdown command
         shutdown_client = MQTTClient(
             client_id=f"django_controller_{client_id}",
-            host="localhost",
-            port=1883,
+            host=settings.MQTT_BROKER["HOST"],
+            port=settings.MQTT_BROKER["PORT"],
             listen_for_control=False  # Don't need to listen for control messages
         )
 
