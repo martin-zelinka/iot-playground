@@ -4,6 +4,7 @@ Simplified MQTT Client with control topic support.
 Listens on device/control/{CLIENT_ID} for shutdown commands.
 """
 
+from datetime import datetime
 import json
 import logging
 import time
@@ -211,7 +212,7 @@ class MQTTClient:
             "location": location,
             "temperature": get_weather(location),
             "unit": "°C",
-            "timestamp": time.time()
+            "measured_at": datetime.now().isoformat(),
         }
         self.publish(f"device/sensors/{self.client_id}/{location}/temperature", payload)
 

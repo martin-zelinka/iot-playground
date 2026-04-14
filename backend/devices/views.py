@@ -14,11 +14,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def _serialize_document(doc):
-    """Convert MongoDB document to JSON-serializable dict."""
-    return json.loads(json_util.dumps(doc))
-
-
 @require_http_methods(["GET"])
 def devices_list(request):
     """
@@ -50,11 +45,10 @@ def device_detail_page(request, client_id):
 
         # Fetch device data from MongoDB using client_id as source
         device_data = get_device_data(source=client_id, limit=100, skip=0)
-        serialized_data = [_serialize_document(doc) for doc in device_data]
 
         return render(request, 'devices/detail.html', {
             'client_id': client_id,
-            'device_data': serialized_data
+            'device_data': device_data
         })
 
     except Exception as e:

@@ -5,10 +5,10 @@ import logging
 import signal
 import sys
 import time
-from datetime import datetime
 
 import django
 import os
+from django.utils import timezone
 
 # Add project root and backend to path
 project_root = os.path.join(os.path.dirname(__file__), '..')
@@ -51,14 +51,14 @@ class MQTTDatabaseBridge:
                 client_id=client_id,
                 defaults={
                     'status': 'online',
-                    'first_seen': datetime.now(),
+                    'first_seen': timezone.now(),
                     'total_packets': 1  # Start at 1 since we just received a message
                 }
             )
 
             if not new_row_created:
                 client.status = 'online'
-                client.last_seen = datetime.now()
+                client.last_seen = timezone.now()
                 client.total_packets += 1
                 client.save(update_fields=['status', 'last_seen', 'total_packets'])
 
@@ -111,14 +111,14 @@ class MQTTDatabaseBridge:
                 client_id=client_id,
                 defaults={
                     'status': status,
-                    'first_seen': datetime.now(),
+                    'first_seen': timezone.now(),
                     'total_packets': 0
                 }
             )
 
             if not created:
                 client.status = status
-                client.last_seen = datetime.now()
+                client.last_seen = timezone.now()
                 client.save(update_fields=['status', 'last_seen'])
 
             status_icon = "🟢" if status == "online" else "🔴"

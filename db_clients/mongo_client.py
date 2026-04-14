@@ -105,7 +105,7 @@ class MongoDBClient:
                         "topic": topic,
                         "message": payload
                     },
-                "received_at": datetime.utcnow(),
+                "received_at": datetime.now(),
             }
 
             result = self.db[self.device_data_collection].insert_one(document)

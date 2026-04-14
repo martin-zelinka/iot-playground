@@ -2,7 +2,9 @@
 MongoDB client for devices app.
 Simple client for querying device_data collection.
 """
+from typing import Optional, List, Dict, Any
 from pymongo import MongoClient
+from pymongo.collection import Collection
 from pymongo.errors import ConnectionFailure, PyMongoError
 from django.conf import settings
 import logging
@@ -23,7 +25,7 @@ class MongoDBClient:
             cls._instance = super(MongoDBClient, cls).__new__(cls)
         return cls._instance
 
-    def connect(self):
+    def connect(self) -> Optional[Collection]:
         """Establish connection to MongoDB."""
         if self._client is not None:
             return self._collection
@@ -53,13 +55,13 @@ class MongoDBClient:
             logger.error(f"Failed to connect to MongoDB: {e}")
             raise
 
-    def get_collection(self):
+    def get_collection(self) -> Collection:
         """Get the device_data collection."""
         if self._collection is None:
             self.connect()
         return self._collection
 
-    def close(self):
+    def close(self) -> None:
         """Close the MongoDB connection."""
         if self._client is not None:
             self._client.close()
@@ -69,7 +71,7 @@ class MongoDBClient:
             logger.info("MongoDB connection closed")
 
 
-def get_device_data(source=None, limit=None, skip=None):
+def get_device_data(source: Optional[str] = None, limit: Optional[int] = None, skip: Optional[int] = None) -> List[Dict[str, Any]]:
     """Get device data documents, optionally filtered by source."""
     try:
         client = MongoDBClient()
@@ -93,7 +95,7 @@ def get_device_data(source=None, limit=None, skip=None):
         raise
 
 
-def get_latest_by_source(source):
+def get_latest_by_source(source: str) -> Optional[Dict[str, Any]]:
     """Get the latest document for a specific source."""
     try:
         client = MongoDBClient()
