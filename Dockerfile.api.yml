@@ -17,8 +17,7 @@ RUN chmod +x /app/docker-entrypoint.sh
 
 # Copy data to /app
 COPY backend/ ./backend
-COPY mqtt/ ./mqtt
-COPY db_clients/ ./db_clients
+COPY iot_devices/ ./iot_devices
 
 # Expose backend API port
 EXPOSE 8000

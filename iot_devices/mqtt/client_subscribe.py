@@ -11,23 +11,28 @@ import os
 from django.utils import timezone
 
 # Add project root and backend to path
-project_root = os.path.join(os.path.dirname(__file__), '..')
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-
+# When running from devices/mqtt/, we need to go up two levels to reach project root
+project_root = os.path.join(os.path.dirname(__file__), '..', '..')
 backend_path = os.path.join(project_root, 'backend')
+
+# Add backend first to avoid conflicts with root-level devices folder
 if backend_path not in sys.path:
     sys.path.insert(0, backend_path)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_api.settings')
 django.setup()
 
 from django.db import transaction
-from mqtt.client import MQTTClient
+from iot_devices.mqtt.client import MQTTClient
 from devices.models import MQTTClientStatus
-from db_clients.mongo_client import MongoDBClient
+from iot_devices.db_clients.mongo_client import MongoDBClient
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 
@@ -76,7 +81,7 @@ class MQTTDatabaseBridge:
 
             # Handle sensor data message `device/sensors/{CLIENT_ID}/*`
 
-            logger.info(f"📩 {topic}: {str(payload)[:100]}...")
+            logger.debug(f"📩 {topic}: {str(payload)[:100]}...")
 
             # Save to PostgreSQL with transaction
             with transaction.atomic():

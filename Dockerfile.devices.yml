@@ -17,8 +17,7 @@ ENV UV_PROJECT_ENVIRONMENT=/usr/local
 RUN uv sync --frozen --no-dev
 
 # Copy data to /app
-COPY mqtt/ ./mqtt
-COPY db_clients/ ./db_clients
+COPY iot_devices/ ./iot_devices
 
 #TODO remove and use own postgre db connector from db_clients
 COPY backend/ ./backend
@@ -27,4 +26,4 @@ COPY backend/ ./backend
 EXPOSE 1883
 
 # Start mosquitto + your Python app
-CMD ["uv", "run", "-m", "mqtt.test.example_db_test"]
+CMD ["uv", "run", "-m", "iot_devices.mqtt.test.example_db_test"]

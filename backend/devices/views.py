@@ -65,7 +65,7 @@ def device_shutdown(request, client_id):
     Send shutdown command to a specific MQTT client device.
     """
     try:
-        from mqtt.client import MQTTClient
+        from iot_devices.mqtt.client import MQTTClient
 
         # Create a temporary client for sending the shutdown command
         shutdown_client = MQTTClient(

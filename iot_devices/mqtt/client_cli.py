@@ -5,9 +5,12 @@ import argparse
 import logging
 import sys
 
-from mqtt.client import MQTTClient
+from iot_devices.mqtt.client import MQTTClient
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 

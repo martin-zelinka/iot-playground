@@ -12,9 +12,12 @@ from typing import Any, Callable
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 
-from mqtt.weather import City, get_weather
+from iot_devices.weather_endpoint import City, get_weather
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 
@@ -130,7 +133,8 @@ class MQTTClient:
             except json.JSONDecodeError:
                 pass
 
-            logger.info(f"📩 {self.client_id} -> Received on '{msg.topic}': {payload}")
+            logger.info(f"📩 {self.client_id} -> Received on '{msg.topic}'")
+            logger.debug(f"📩 '{msg.topic}': {payload}")
 
             # Handle control messages
             if msg.topic == f"device/control/{self.client_id}":
@@ -155,7 +159,7 @@ class MQTTClient:
 
             logger.info(f"🎛️  Control command received: {command}")
 
-            if command in ['shutdown', 'stop', 'exit', 'quit']:
+            if command in ['shutdown']:
                 logger.info("🛑 Shutdown command received, stopping client...")
                 self.running = False
                 self.disconnect()
@@ -188,7 +192,8 @@ class MQTTClient:
         result = self.client.publish(topic, payload, qos=qos, retain=retain)
 
         if result.rc == mqtt.MQTT_ERR_SUCCESS:
-            logger.info(f"📤 {self.client_id} -> Published to '{topic}': {payload[:100]}...")
+            logger.info(f"📤 {self.client_id} -> Published to '{topic}'")
+            logger.debug(payload)
         else:
             logger.error(f"✗ Failed to publish to '{topic}'")
 

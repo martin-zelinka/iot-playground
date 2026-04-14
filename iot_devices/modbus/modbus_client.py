@@ -5,7 +5,7 @@ import os
 import time
 from dotenv import load_dotenv
 from pymodbus.client import ModbusTcpClient
-from db_clients.mongo_client import create_mongo_client
+from iot_devices.db_clients.mongo_client import create_mongo_client
 
 # Configure logging
 logging.basicConfig(

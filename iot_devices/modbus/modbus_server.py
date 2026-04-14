@@ -8,9 +8,8 @@ from pymodbus.server import ModbusTcpServer
 from pymodbus.simulator import DataType, SimData, SimDevice
 from pymodbus.client import ModbusTcpClient
 
-from mqtt.weather import get_weather_async
+from iot_devices.weather_endpoint import get_weather_async
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -68,7 +67,7 @@ async def run_modbus_server():
     )
 
     # Start background task to update float32 values
-    update_task = asyncio.create_task(update_float32_values(server, poll_interval))
+    _ = asyncio.create_task(update_float32_values(server, poll_interval))
 
     # Start server
     logger.info("Starting Modbus TCP Server with Float32 support")

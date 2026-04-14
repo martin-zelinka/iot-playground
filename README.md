@@ -1,5 +1,38 @@
 # IoT playground
 
+### Project Structure
+
+```
+iot-playground/
+├── backend/                          # Django REST API
+│   ├── devices/                      # Django app for device management
+│   ├── django_api/                   # Django project settings
+│   ├── manage.py                     # Django management script
+│
+├── iot_devices/                      # IoT device implementations
+│   ├── mqtt/                         # MQTT communication
+│   │   ├── broker.py                 # MQTT broker implementation
+│   │   ├── client.py                 # MQTT client base class
+│   │   ├── client_cli.py             # CLI interface for MQTT client
+│   │   ├── client_subscribe.py       # Database bridge (MQTT → PostgreSQL/MongoDB)
+│   │   └── run_broker_clients.py     # Run MQTT clients with MQTT db bridge client
+│   │
+│   ├── modbus/                       # Modbus TCP communication
+│   │   ├── modbus_server.py          # Modbus TCP server with weather data
+│   │   ├── modbus_client.py          # Modbus TCP client → MongoDB
+│   │   └── run_server_client.py      # Run both server and client
+│   │
+│   ├── db_clients/                   # Database client wrappers
+│   │   └── mongo_client.py           # MongoDB client with packet storage
+│   │
+│   └── weather_endpoint.py           # Weather API (Open-Meteo)
+│
+├── docker-compose.yml                # Docker orchestration
+├── Dockerfile.api.yml                # Docker image for Django API
+├── Dockerfile.device.yml             # Docker image for IoT devices
+└── pyproject.toml                    # Python project configuration
+```
+
 ### MQTT Topics Architecture
 
 ![MQTT Schema](mqtt_schema.png)
@@ -42,7 +75,8 @@ uv sync
 
 # run app
 uv run backend/manage.py runserver
-uv run -m mqtt.test.example_db_test
+uv run -m iot_devices.mqtt.run_broker_clients
+uv run -m iot_devices.modbus.run_server_client
 ```
 
 **Docker:**
@@ -52,5 +86,5 @@ docker-compose up
 
 # attach shell to conainer for debugging purpose
 docker run -it -p 8000:8000 iot-playground-web bash
-docker run -it -p 1883:1883 iot-playground-mqtt bash
+docker run -it iot-playground-devices bash
 ```

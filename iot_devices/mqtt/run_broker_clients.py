@@ -7,9 +7,9 @@ Demonstrates the full data flow from publisher to database storage.
 import random
 import time
 import threading
-from mqtt.broker import MQTTBroker
-from mqtt.client import MQTTClient
-from mqtt.client_subscribe import MQTTDatabaseBridge
+from iot_devices.mqtt.broker import MQTTBroker
+from iot_devices.mqtt.client import MQTTClient
+from iot_devices.mqtt.client_subscribe import MQTTDatabaseBridge
 
 
 def database_service_example():

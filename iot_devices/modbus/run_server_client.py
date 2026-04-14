@@ -5,8 +5,8 @@ import time
 import asyncio
 import logging
 
-from modbus.modbus_server import run_modbus_server
-from modbus.modbus_client import run_modbus_client
+from iot_devices.modbus.modbus_server import run_modbus_server
+from iot_devices.modbus.modbus_client import run_modbus_client
 
 # Configure logging
 logging.basicConfig(

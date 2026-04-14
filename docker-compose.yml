@@ -8,8 +8,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app/backend
-      - ./mqtt:/app/mqtt
-      - ./db_clients:/app/db_clients
+      - ./iot_devices:/app/iot_devices
     env_file:
       - .env_docker
     depends_on:
@@ -20,16 +19,15 @@ services:
     networks:
       - app_network
 
-  mqtt:
+  devices:
     build:
       context: .
-      dockerfile: Dockerfile.mqtt.yml
-    container_name: mqtt_broker
+      dockerfile: Dockerfile.devices.yml
+    container_name: iot_devices
     ports:
       - "1883:1883"
     volumes:
-      - ./mqtt:/app/mqtt
-      - ./db_clients:/app/db_clients
+      - ./iot_devices:/app/iot_devices
     env_file:
       - .env_docker
     depends_on:
