@@ -116,6 +116,31 @@ class MongoDBClient:
             logger.error(f"Error storing packet in MongoDB: {e}")
             return None
 
+    def store_modbus_packet(self, payload: Dict[str, Any]) -> Optional[str]:
+        """Store an Modbus Data in MongoDB device_data collection."""
+        if not self.connected:
+            logger.warning("Cannot store packet: Not connected to MongoDB")
+            return None
+
+        try:
+            document = {
+                "source": "modbus-tcp-server",
+                "protocol": "modbus",
+                "payload":
+                    {
+                        "registry_data": payload
+                    },
+                "received_at": datetime.now(),
+            }
+
+            result = self.db[self.device_data_collection].insert_one(document)
+            logger.debug(f"Stored packet in MongoDB with ID: {result.inserted_id}")
+            return str(result.inserted_id)
+
+        except Exception as e:
+            logger.error(f"Error storing packet in MongoDB: {e}")
+            return None
+
     def get_stats(self) -> Dict[str, Any]:
         """Get database statistics."""
         if not self.connected:
