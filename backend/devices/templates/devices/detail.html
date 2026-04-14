@@ -39,7 +39,7 @@
                     <td>{{ data.source|default:"N/A" }}</td>
                     <td>{{ data.protocol|default:"N/A" }}</td>
                     <td>{{ data.payload.topic|default:"N/A" }}</td>
-                    <td class="json-cell">{{ data.payload.message|default:"{}" }}</td>
+                    <td class="json-cell">{{ data.payload|default:"{}" }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

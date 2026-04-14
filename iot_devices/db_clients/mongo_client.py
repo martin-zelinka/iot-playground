@@ -4,11 +4,11 @@
 import logging
 import os
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any
 
+from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -26,7 +26,7 @@ class MongoDBClient:
         self.username = os.getenv("MONGODB_USER", "")
         self.password = os.getenv("MONGODB_PASSWORD", "")
 
-        self.client: Optional[MongoClient] = None
+        self.client: MongoClient | None = None
         self.db = None
         self.connected = False
 
@@ -53,7 +53,7 @@ class MongoDBClient:
             )
 
             # Test connection
-            self.client.admin.command('ping')
+            self.client.admin.command("ping")
 
             # Get database
             self.db = self.client[self.database_name]
@@ -62,7 +62,9 @@ class MongoDBClient:
             # Create indexes
             self._create_indexes()
 
-            logger.info(f"✓ Connected to MongoDB at {self.host}:{self.port}/{self.database_name}")
+            logger.info(
+                f"✓ Connected to MongoDB at {self.host}:{self.port}/{self.database_name}"
+            )
             return True
 
         except (ConnectionFailure, ServerSelectionTimeoutError) as e:
@@ -81,7 +83,9 @@ class MongoDBClient:
         """Create indexes for better query performance."""
         try:
             # Device data indexes
-            self.db[self.device_data_collection].create_index([("topic", 1), ("received_at", -1)])
+            self.db[self.device_data_collection].create_index(
+                [("topic", 1), ("received_at", -1)]
+            )
             self.db[self.device_data_collection].create_index([("received_at", -1)])
             self.db[self.device_data_collection].create_index([("topic", 1)])
 
@@ -90,7 +94,7 @@ class MongoDBClient:
         except Exception as e:
             logger.warning(f"Warning: Could not create indexes: {e}")
 
-    def store_mqtt_packet(self, topic: str, payload: Dict[str, Any]) -> Optional[str]:
+    def store_mqtt_packet(self, topic: str, payload: dict[str, Any]) -> str | None:
         """Store an MQTT packet in MongoDB device_data collection."""
         if not self.connected:
             logger.warning("Cannot store packet: Not connected to MongoDB")
@@ -98,13 +102,9 @@ class MongoDBClient:
 
         try:
             document = {
-                "source": topic.split('/')[2],
+                "source": topic.split("/")[2],
                 "protocol": "mqtt",
-                "payload":
-                    {
-                        "topic": topic,
-                        "message": payload
-                    },
+                "payload": {"topic": topic, "message": payload},
                 "received_at": datetime.now(),
             }
 
@@ -116,7 +116,7 @@ class MongoDBClient:
             logger.error(f"Error storing packet in MongoDB: {e}")
             return None
 
-    def store_modbus_packet(self, payload: Dict[str, Any]) -> Optional[str]:
+    def store_modbus_packet(self, payload: dict[str, Any]) -> str | None:
         """Store an Modbus Data in MongoDB device_data collection."""
         if not self.connected:
             logger.warning("Cannot store packet: Not connected to MongoDB")
@@ -126,10 +126,7 @@ class MongoDBClient:
             document = {
                 "source": "modbus-tcp-server",
                 "protocol": "modbus",
-                "payload":
-                    {
-                        "registry_data": payload
-                    },
+                "payload": {"registry_data": payload},
                 "received_at": datetime.now(),
             }
 
@@ -141,14 +138,16 @@ class MongoDBClient:
             logger.error(f"Error storing packet in MongoDB: {e}")
             return None
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get database statistics."""
         if not self.connected:
             return {}
 
         try:
             stats = {
-                "device_data_count": self.db[self.device_data_collection].count_documents({}),
+                "device_data_count": self.db[
+                    self.device_data_collection
+                ].count_documents({}),
                 "database_size": self.db.command("dbstats")["dataSize"],
                 "collections": self.db.list_collection_names(),
             }

@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """Run Modbus server and client to demonstrate full data flow."""
-import multiprocessing
-import time
+
 import asyncio
 import logging
+import multiprocessing
+import time
 
-from iot_devices.modbus.modbus_server import run_modbus_server
 from iot_devices.modbus.modbus_client import run_modbus_client
+from iot_devices.modbus.modbus_server import run_modbus_server
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 

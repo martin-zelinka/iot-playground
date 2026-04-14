@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 import sys
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -34,7 +35,7 @@ SECRET_KEY = "django-insecure-9b^^-gum82m6398_gs&0ute*9=d7d6gvz0*9#ndjl9d0%8r=_i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']  # For development, or specific IPs for production
+ALLOWED_HOSTS = ["*"]  # For development, or specific IPs for production
 
 
 # Application definition

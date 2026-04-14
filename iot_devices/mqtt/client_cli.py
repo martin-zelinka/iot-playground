@@ -8,8 +8,7 @@ import sys
 from iot_devices.mqtt.client import MQTTClient
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -17,14 +16,24 @@ logger = logging.getLogger(__name__)
 def main():
     """CLI interface for MQTT Client."""
     parser = argparse.ArgumentParser(description="MQTT Client for easycon")
-    parser.add_argument("--client-id", type=str, default="mqtt_client", help="Client ID")
-    parser.add_argument("--host", type=str, default="localhost", help="MQTT broker host")
+    parser.add_argument(
+        "--client-id", type=str, default="mqtt_client", help="Client ID"
+    )
+    parser.add_argument(
+        "--host", type=str, default="localhost", help="MQTT broker host"
+    )
     parser.add_argument("--port", type=int, default=1883, help="MQTT broker port")
-    parser.add_argument("--topic", type=str, help="Topic to subscribe to `device/sensors/#`")
+    parser.add_argument(
+        "--topic", type=str, help="Topic to subscribe to `device/sensors/#`"
+    )
     parser.add_argument("--publish", type=str, help="Topic to publish to")
     parser.add_argument("--message", type=str, help="Message to publish")
-    parser.add_argument("--city", type=str, help="Publish sensor data (format: LON, PRG, BRN)")
-    parser.add_argument("--no-control", action="store_true", help="Disable control topic listening")
+    parser.add_argument(
+        "--city", type=str, help="Publish sensor data (format: LON, PRG, BRN)"
+    )
+    parser.add_argument(
+        "--no-control", action="store_true", help="Disable control topic listening"
+    )
 
     args = parser.parse_args()
 
@@ -33,7 +42,7 @@ def main():
         client_id=args.client_id,
         host=args.host,
         port=args.port,
-        listen_for_control=not args.no_control
+        listen_for_control=not args.no_control,
     )
 
     # Connect
@@ -62,6 +71,7 @@ def main():
     else:
         # Disconnect if just publishing
         import time
+
         time.sleep(1)
         client.disconnect()
 

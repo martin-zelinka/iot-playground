@@ -2,12 +2,14 @@
 MongoDB client for devices app.
 Simple client for querying device_data collection.
 """
-from typing import Optional, List, Dict, Any
+
+import logging
+from typing import Any
+
+from django.conf import settings
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.errors import ConnectionFailure, PyMongoError
-from django.conf import settings
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -22,31 +24,33 @@ class MongoDBClient:
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(MongoDBClient, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
         return cls._instance
 
-    def connect(self) -> Optional[Collection]:
+    def connect(self) -> Collection | None:
         """Establish connection to MongoDB."""
         if self._client is not None:
             return self._collection
 
         try:
-            mongo_config = settings.MONGODB_DATABASES['default']
-            host = mongo_config['HOST']
-            port = mongo_config['PORT']
-            db_name = mongo_config['NAME']
-            username = mongo_config.get('USER')
-            password = mongo_config.get('PASSWORD')
+            mongo_config = settings.MONGODB_DATABASES["default"]
+            host = mongo_config["HOST"]
+            port = mongo_config["PORT"]
+            db_name = mongo_config["NAME"]
+            username = mongo_config.get("USER")
+            password = mongo_config.get("PASSWORD")
 
             if username and password:
-                connection_string = f"mongodb://{username}:{password}@{host}:{port}/{db_name}"
+                connection_string = (
+                    f"mongodb://{username}:{password}@{host}:{port}/{db_name}"
+                )
             else:
                 connection_string = f"mongodb://{host}:{port}/{db_name}"
 
             self._client = MongoClient(connection_string)
-            self._client.admin.command('ping')
+            self._client.admin.command("ping")
             self._db = self._client[db_name]
-            self._collection = self._db['device_data']
+            self._collection = self._db["device_data"]
             logger.info(f"Connected to MongoDB: {db_name}.device_data")
 
             return self._collection
@@ -71,7 +75,9 @@ class MongoDBClient:
             logger.info("MongoDB connection closed")
 
 
-def get_device_data(source: Optional[str] = None, limit: Optional[int] = None, skip: Optional[int] = None) -> List[Dict[str, Any]]:
+def get_device_data(
+    source: str | None = None, limit: int | None = None, skip: int | None = None
+) -> list[dict[str, Any]]:
     """Get device data documents, optionally filtered by source."""
     try:
         client = MongoDBClient()
@@ -79,9 +85,9 @@ def get_device_data(source: Optional[str] = None, limit: Optional[int] = None, s
 
         query = {}
         if source:
-            query['source'] = source
+            query["source"] = source
 
-        cursor = collection.find(query).sort('received_at', -1)
+        cursor = collection.find(query).sort("received_at", -1)
 
         if skip:
             cursor = cursor.skip(skip)
@@ -95,12 +101,12 @@ def get_device_data(source: Optional[str] = None, limit: Optional[int] = None, s
         raise
 
 
-def get_latest_by_source(source: str) -> Optional[Dict[str, Any]]:
+def get_latest_by_source(source: str) -> dict[str, Any] | None:
     """Get the latest document for a specific source."""
     try:
         client = MongoDBClient()
         collection = client.get_collection()
-        return collection.find_one({'source': source}, sort=[('received_at', -1)])
+        return collection.find_one({"source": source}, sort=[("received_at", -1)])
 
     except PyMongoError as e:
         logger.error(f"Error getting latest data for source {source}: {e}")

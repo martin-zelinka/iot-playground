@@ -4,17 +4,19 @@ MQTT Broker implementation using Mosquitto.
 This script manages a local Mosquitto broker for development/testing.
 """
 
-import subprocess
-import time
 import signal
+import subprocess
 import sys
+import time
 from pathlib import Path
 
 
 class MQTTBroker:
     """Manages a local Mosquitto MQTT broker."""
 
-    def __init__(self, port: int = 1883, host: str = "localhost", config_file: str = None):
+    def __init__(
+        self, port: int = 1883, host: str = "localhost", config_file: str = None
+    ):
         self.port = port
         self.host = host
         self.process = None
@@ -49,7 +51,7 @@ class MQTTBroker:
                 ["mosquitto", "-c", str(self.config_file)],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
             )
 
             # Wait a bit for broker to start
@@ -60,7 +62,7 @@ class MQTTBroker:
                 print(f"  Process ID: {self.process.pid}")
             else:
                 stdout, stderr = self.process.communicate()
-                print(f"✗ Failed to start MQTT Broker")
+                print("✗ Failed to start MQTT Broker")
                 print(f"  stdout: {stdout}")
                 print(f"  stderr: {stderr}")
                 self.process = None
@@ -111,11 +113,25 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="MQTT Broker for easycon")
-    parser.add_argument("--port", type=int, default=1883, help="Port number (default: 1883)")
-    parser.add_argument("--host", type=str, default="localhost", help="Host address (default: localhost)")
-    parser.add_argument("--config", type=str, default=None, help="Path to mosquitto configuration file")
-    parser.add_argument("--action", type=str, default="start",
-                       choices=["start", "stop", "restart"], help="Action to perform")
+    parser.add_argument(
+        "--port", type=int, default=1883, help="Port number (default: 1883)"
+    )
+    parser.add_argument(
+        "--host",
+        type=str,
+        default="localhost",
+        help="Host address (default: localhost)",
+    )
+    parser.add_argument(
+        "--config", type=str, default=None, help="Path to mosquitto configuration file"
+    )
+    parser.add_argument(
+        "--action",
+        type=str,
+        default="start",
+        choices=["start", "stop", "restart"],
+        help="Action to perform",
+    )
 
     args = parser.parse_args()
 

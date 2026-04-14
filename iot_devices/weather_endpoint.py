@@ -1,26 +1,23 @@
-import asyncio
-import requests
-import aiohttp
 from typing import Literal
-from requests.exceptions import Timeout, RequestException
+
+import aiohttp
+import requests
+from requests.exceptions import RequestException, Timeout
 
 type City = Literal["LON", "PRG", "BRN"]
+
 
 def get_weather(city: City) -> float | None:
     cities = {
         "LON": (51.5074, -0.1278),
         "PRG": (50.0755, 14.4378),
-        "BRN": (49.1951, 16.6068)
+        "BRN": (49.1951, 16.6068),
     }
 
     url = "https://api.open-meteo.com/v1/forecast"
 
     lat, lon = cities[city]
-    params = {
-        "latitude": lat,
-        "longitude": lon,
-        "current_weather": "true"
-    }
+    params = {"latitude": lat, "longitude": lon, "current_weather": "true"}
 
     try:
         response = requests.get(url, params=params, timeout=8)
@@ -42,17 +39,13 @@ async def get_weather_async(city: City) -> float | None:
     cities = {
         "LON": (51.5074, -0.1278),
         "PRG": (50.0755, 14.4378),
-        "BRN": (49.1951, 16.6068)
+        "BRN": (49.1951, 16.6068),
     }
 
     url = "https://api.open-meteo.com/v1/forecast"
 
     lat, lon = cities[city]
-    params = {
-        "latitude": lat,
-        "longitude": lon,
-        "current_weather": "true"
-    }
+    params = {"latitude": lat, "longitude": lon, "current_weather": "true"}
 
     try:
         timeout = aiohttp.ClientTimeout(total=8)
@@ -61,7 +54,7 @@ async def get_weather_async(city: City) -> float | None:
                 data = await response.json()
                 temp = data["current_weather"]["temperature"]
                 return float(temp)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         print(f"{city}: Async request timed out after 8 seconds")
         return None
     except aiohttp.ClientError as e:

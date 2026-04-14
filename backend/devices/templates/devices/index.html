@@ -4,11 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MQTT Client Devices</title>
+    <title>IOT Client Devices</title>
     <link rel="stylesheet" href="{% static 'devices/css/index.css' %}">
 </head>
 <body>
     <div class="container">
+
+        <div class="quick-links">
+            <a href="{% url 'devices:device_detail_page' 'modbus-tcp-server' %}">View Modbus TCP Server</a>
+        </div>
+
         <h1>MQTT Client Devices</h1>
 
         {% if messages %}

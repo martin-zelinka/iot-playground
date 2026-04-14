@@ -4,19 +4,20 @@ Simplified MQTT Client with control topic support.
 Listens on device/control/{CLIENT_ID} for shutdown commands.
 """
 
-from datetime import datetime
 import json
 import logging
 import time
-from typing import Any, Callable
+from collections.abc import Callable
+from datetime import datetime
+from typing import Any
+
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 
 from iot_devices.weather_endpoint import City, get_weather
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -31,21 +32,20 @@ class MQTTClient:
         port: int = 1883,
         keepalive: int = 60,
         listen_for_control: bool = True,
-        enable_lwt: bool = False
+        enable_lwt: bool = False,
     ):
         self.client_id = client_id
         self.host = host
         self.port = port
         self.keepalive = keepalive
         self.listen_for_control = listen_for_control
-        self.enable_lwt = enable_lwt # client automatically publish msg when they disconnect unexpectedly
+        self.enable_lwt = enable_lwt  # client automatically publish msg when they disconnect unexpectedly
         self.running = True
         self.message_callback = None
 
         # Create client
         self.client = mqtt.Client(
-            callback_api_version=CallbackAPIVersion.VERSION2,
-            client_id=client_id
+            callback_api_version=CallbackAPIVersion.VERSION2, client_id=client_id
         )
         self._setup_callbacks()
 
@@ -55,7 +55,9 @@ class MQTTClient:
             # Set Last Will and Testament if enabled
             if self.enable_lwt:
                 will_topic = f"device/status/{self.client_id}"
-                will_payload = json.dumps({"status": "offline", "client_id": self.client_id})
+                will_payload = json.dumps(
+                    {"status": "offline", "client_id": self.client_id}
+                )
                 self.client.will_set(will_topic, will_payload, qos=1, retain=True)
                 logger.info(f"✓ LWT configured: {will_topic}")
 
@@ -153,18 +155,18 @@ class MQTTClient:
         try:
             # Handle both string and JSON payloads
             if isinstance(payload, dict):
-                command = payload.get('command', payload)
+                command = payload.get("command", payload)
             else:
                 command = str(payload).lower()
 
             logger.info(f"🎛️  Control command received: {command}")
 
-            if command in ['shutdown']:
+            if command in ["shutdown"]:
                 logger.info("🛑 Shutdown command received, stopping client...")
                 self.running = False
                 self.disconnect()
 
-            elif command == 'restart':
+            elif command == "restart":
                 logger.info("🔄 Restart command received...")
                 self.disconnect()
                 time.sleep(2)
@@ -231,4 +233,3 @@ class MQTTClient:
             logger.info("⏹️  Interrupted by user")
         finally:
             self.disconnect()
-

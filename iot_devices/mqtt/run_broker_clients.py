@@ -5,8 +5,9 @@ Demonstrates the full data flow from publisher to database storage.
 """
 
 import random
-import time
 import threading
+import time
+
 from iot_devices.mqtt.broker import MQTTBroker
 from iot_devices.mqtt.client import MQTTClient
 from iot_devices.mqtt.client_subscribe import MQTTDatabaseBridge
@@ -22,7 +23,9 @@ def database_service_example():
 def publisher_example(city):
     """Publish weather data that will be stored in the database."""
     print("📡 Starting Weather Publisher...")
-    publisher = MQTTClient(client_id=f"weather_publisher_{random.randint(1000, 9999)}", enable_lwt=True)
+    publisher = MQTTClient(
+        client_id=f"weather_publisher_{random.randint(1000, 9999)}", enable_lwt=True
+    )
 
     if not publisher.connect():
         print("❌ Failed to connect to MQTT broker")
@@ -42,7 +45,6 @@ def publisher_example(city):
             print(f"❌ Error getting weather for {city}: {e}")
 
         time.sleep(3)  # Wait between messages
-
 
     publisher.disconnect()
     print("✅ Publisher finished")
@@ -73,8 +75,12 @@ def main():
 
         # Run both publishers simultaneously
         print("\n3️⃣  Starting Weather Publishers for LON and PRG...")
-        lon_thread = threading.Thread(target=publisher_example, args=("LON",), daemon=True)
-        prg_thread = threading.Thread(target=publisher_example, args=("PRG",), daemon=True)
+        lon_thread = threading.Thread(
+            target=publisher_example, args=("LON",), daemon=True
+        )
+        prg_thread = threading.Thread(
+            target=publisher_example, args=("PRG",), daemon=True
+        )
 
         # Start both publishers at the same time
         lon_thread.start()

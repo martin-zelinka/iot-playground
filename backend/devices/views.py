@@ -2,14 +2,13 @@
 Views for devices app.
 Provides web pages for viewing MQTT client devices and their data.
 """
-from django.conf import settings
-from django.views.decorators.http import require_http_methods
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from bson import json_util
-import json
+
 import logging
 
+from django.conf import settings
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.views.decorators.http import require_http_methods
 
 logger = logging.getLogger(__name__)
 
@@ -23,16 +22,17 @@ def devices_list(request):
         from .models import MQTTClientStatus
 
         devices = MQTTClientStatus.objects.all()
-        online_count = devices.filter(status='online').count()
+        online_count = devices.filter(status="online").count()
 
-        return render(request, 'devices/index.html', {
-            'devices': devices,
-            'online_count': online_count
-        })
+        return render(
+            request,
+            "devices/index.html",
+            {"devices": devices, "online_count": online_count},
+        )
 
     except Exception as e:
         logger.error(f"Error fetching devices: {e}")
-        return render(request, 'devices/index.html', {'devices': [], 'online_count': 0})
+        return render(request, "devices/index.html", {"devices": [], "online_count": 0})
 
 
 @require_http_methods(["GET"])
@@ -46,17 +46,17 @@ def device_detail_page(request, client_id):
         # Fetch device data from MongoDB using client_id as source
         device_data = get_device_data(source=client_id, limit=100, skip=0)
 
-        return render(request, 'devices/detail.html', {
-            'client_id': client_id,
-            'device_data': device_data
-        })
+        return render(
+            request,
+            "devices/detail.html",
+            {"client_id": client_id, "device_data": device_data},
+        )
 
     except Exception as e:
         logger.error(f"Error fetching device data for {client_id}: {e}")
-        return render(request, 'devices/detail.html', {
-            'client_id': client_id,
-            'device_data': []
-        })
+        return render(
+            request, "devices/detail.html", {"client_id": client_id, "device_data": []}
+        )
 
 
 @require_http_methods(["POST"])
@@ -72,7 +72,7 @@ def device_shutdown(request, client_id):
             client_id=f"django_controller_{client_id}",
             host=settings.MQTT_BROKER["HOST"],
             port=settings.MQTT_BROKER["PORT"],
-            listen_for_control=False  # Don't need to listen for control messages
+            listen_for_control=False,  # Don't need to listen for control messages
         )
 
         if shutdown_client.connect():
@@ -85,6 +85,7 @@ def device_shutdown(request, client_id):
 
             # Give the message time to be sent
             import time
+
             time.sleep(0.5)
 
             shutdown_client.disconnect()
@@ -97,4 +98,4 @@ def device_shutdown(request, client_id):
         messages.error(request, f"Error: {str(e)}")
 
     # Redirect back to devices list
-    return redirect('devices:devices_list')
+    return redirect("devices:devices_list")

@@ -24,8 +24,31 @@ body {
 h1 {
     background: #2c3e50;
     color: white;
-    padding: 20px;
+    padding: 10px;
     margin: 0;
+    font-size: 24px;
+}
+
+.quick-links {
+    padding: 15px 20px;
+    background: #ecf0f1;
+    border-bottom: 1px solid #bdc3c7;
+}
+
+.quick-links a {
+    display: inline-block;
+    background: #3498db;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+.quick-links a:hover {
+    background: #2980b9;
 }
 
 table {

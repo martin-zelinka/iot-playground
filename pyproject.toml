@@ -18,5 +18,18 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "black>=26.3.1",
+    "ruff>=0.9.0",
 ]
+
+[tool.ruff]
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]
+fixable = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

@@ -19,11 +19,12 @@ RUN uv sync --frozen --no-dev
 # Copy data to /app
 COPY iot_devices/ ./iot_devices
 
-#TODO remove and use own postgre db connector from db_clients
+#TODO: remove and use own postgre db connector from db_clients
 COPY backend/ ./backend
 
 # Expose MQTT broker port
 EXPOSE 1883
 
-# Start mosquitto + your Python app
-CMD ["uv", "run", "-m", "iot_devices.mqtt.test.example_db_test"]
+# Start Python app with iot devices
+# CMD ["uv", "run", "-m", "iot_devices.modbus.run_server_client"]
+CMD ["uv", "run", "-m", "iot_devices.run_all_devices"]
