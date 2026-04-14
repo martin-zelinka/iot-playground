@@ -54,8 +54,6 @@ async def get_weather_async(city: City) -> float | None:
         "current_weather": "true"
     }
 
-    print('geting wheather data')
-
     try:
         timeout = aiohttp.ClientTimeout(total=8)
         async with aiohttp.ClientSession(timeout=timeout) as session:
