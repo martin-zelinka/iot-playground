@@ -47,6 +47,8 @@ class MQTTClient:
         self.client = mqtt.Client(
             callback_api_version=CallbackAPIVersion.VERSION2, client_id=client_id
         )
+        self.client.tls_set(ca_certs="./iot_devices/mqtt/cert/server.crt")
+        #self.client.tls_insecure_set(True)  # Disable hostname verification for development
         self._setup_callbacks()
 
     def connect(self) -> bool:

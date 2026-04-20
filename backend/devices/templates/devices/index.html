@@ -54,7 +54,7 @@
                         {% if device.status == 'online' %}
                         <form method="post" action="{% url 'devices:device_shutdown' device.client_id %}" style="display: inline;">
                             {% csrf_token %}
-                            <button type="submit" class="shutdown-btn" onclick="return confirm('Are you sure you want to shutdown device {{ device.client_id }}?');">
+                            <button type="submit" class="shutdown-btn">
                                 Shutdown
                             </button>
                         </form>

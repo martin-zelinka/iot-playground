@@ -7,7 +7,7 @@ iot-playground/
 ├── backend/                          # Django REST API
 │   ├── devices/                      # Django app for device management
 │   ├── django_api/                   # Django project settings
-│   ├── manage.py                     # Django management script
+│   └── manage.py                     # Django management script
 │
 ├── iot_devices/                      # IoT device implementations
 │   ├── mqtt/                         # MQTT communication
@@ -34,11 +34,12 @@ iot-playground/
 └── pyproject.toml                    # Python project configuration
 ```
 
-### MQTT Topics Architecture
+### Project Schema
 
-![MQTT Schema](mqtt_schema.png)
+![MQTT Schema](project_schema.png)
 
 ### MQTT Clients:
+comprise of MQTT broker implementation using Mosquitto and Python MQTT clients using paho-mqtt
 
 **Sensor client** connect with LWT (Last Will and Testament) enabled
 - Automatically publish `online` status to `device/status/{CLIENT_ID}` on connect
@@ -97,8 +98,10 @@ uv run -m iot_devices.modbus.run_server_client
 uv run -m iot_devices.run_all_devices
 ```
 
-### TODO
+---
+
+### TODOs
 - add unit test
-- add protection to modbus tcp and mqtt communication
+- add protection to modbus tcp comminication
 - to get client status maybe would be better to use broker-specific topics `$SYS/broker/connection/+/state`
 - use own postgre db connector in MQTTDatabaseBridge class, now it's using django postgres models
